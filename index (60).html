@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>МережаЗв'язків • Теорія Графів & AR</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="app">
+        <div class="sidebar glass-panel">
+            <div class="logo">
+                <i class="fas fa-project-diagram"></i>
+                <h1>МережаЗв'язків</h1>
+            </div>
+            
+            <nav class="menu">
+                <a href="#" onclick="switchTab(0)" class="active"><i class="fas fa-network-wired"></i> Граф</a>
+                <a href="#" onclick="switchTab(1)"><i class="fas fa-users"></i> Профілі</a>
+                <a href="#" onclick="switchTab(2)"><i class="fas fa-star"></i> Рекомендації</a>
+                <a href="#" onclick="switchTab(3)"><i class="fas fa-hashtag"></i> Інтереси</a>
+                <a href="#" onclick="initARMode()" style="background: rgba(255,126,179,0.15); color: var(--accent-pink); font-weight: bold;"><i class="fas fa-vr-cardboard"></i> Увімкнути AR</a>
+            </nav>
+            
+            <div class="stats">
+                <div class="stat-item glass-panel">
+                    <span class="stat-value" id="total-people">0</span>
+                    <span class="stat-label">Вузлів</span>
+                </div>
+                <div class="stat-item glass-panel">
+                    <span class="stat-value" id="total-edges">0</span>
+                    <span class="stat-label">Зв'язків</span>
+                </div>
+            </div>
+
+            <div class="search-box mt-4">
+                <input type="text" placeholder="Пошук за ім'ям... [Enter]" onkeypress="searchPeople(event)">
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div id="tab-0" class="tab-content active">
+                <div class="graph-container">
+                    <svg id="graph-svg" width="100%" height="100%"></svg>
+                    
+                    <div class="graph-controls glass-panel">
+                        <button onclick="randomizeConnections()" class="btn btn-sm"><i class="fas fa-random"></i> Перегенерувати зв'язки</button>
+                        <button onclick="findHub()" class="btn btn-sm"><i class="fas fa-crown"></i> Знайти Хаб</button>
+                        <button onclick="resetGraph()" class="btn btn-sm danger"><i class="fas fa-trash-alt"></i> Очистити</button>
+                    </div>
+
+                    <div id="floating-panel" class="floating-panel glass-panel hidden">
+                        <button onclick="closeFloatingPanel()" class="close-btn">&times;</button>
+                        <div class="panel-header">
+                            <div class="avatar" id="panel-avatar">У</div>
+                            <h2 id="panel-name">Користувач</h2>
+                        </div>
+                        <div class="panel-body">
+                            <h3>Інтереси</h3>
+                            <div id="panel-interests" class="interests mt-2"></div>
+                            
+                            <h3 class="mt-4">Найближчі в мережі</h3>
+                            <div id="panel-nearby" class="nearby-list mt-2"></div>
+
+                            <h3 class="mt-4">GNN Рекомендація</h3>
+                            <div id="panel-recommendation" class="recommendation-box mt-2"></div>
+
+                            <button onclick="highlightSimilarNodes()" class="btn primary full-width mt-4">
+                                <i class="fas fa-eye"></i> Підсвітити схожих (Статика)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="tab-1" class="tab-content">
+                <div class="profile-grid" id="profile-grid"></div>
+            </div>
+            
+            <div id="tab-2" class="tab-content">
+                <h2>Алгоритм Cosine Similarity & GNN Structure</h2>
+                <p class="subtitle">Рекомендації на основі точного збігу спільних інтересів.</p>
+                <div id="recommendations-list" class="recommendations-list mt-4"></div>
+            </div>
+            
+            <div id="tab-3" class="tab-content">
+                <h2>Аналіз Інтересів</h2>
+                <div class="add-user-box glass-panel mt-2 p-4">
+                    <h3>Додати користувача в GNN модель</h3>
+                    <input type="text" id="new-user-name" placeholder="Ім'я та Прізвище" class="mt-2" style="width:100%; padding:8px; background: rgba(0,0,0,0.2); border:1px solid var(--glass-border); color:white; border-radius:6px;">
+                    <div id="interests-selector" class="mt-2" style="max-height:120px; overflow-y:auto; padding:5px;"></div>
+                    <button onclick="createNewUser()" class="btn primary mt-2 full-width"><i class="fas fa-user-plus"></i> Створити та підібрати друзів</button>
+                </div>
+                <h2 class="mt-4">Хмара інтересів графа</h2>
+                <div id="all-interests" class="interests-cloud mt-2"></div>
+            </div>
+        </div>
+        
+        <button onclick="toggleAddMode()" id="fab" class="fab" title="Режим редагування зв'язків">
+            <i class="fas fa-link"></i>
+        </button>
+
+        <div id="context-menu" class="context-menu glass-panel hidden">
+            <button id="delete-edge-btn" class="context-btn danger-text">
+                <i class="fas fa-unlink"></i> Розірвати зв'язок
+            </button>
+        </div>
+    </div>
+    
+    <div id="toast" class="toast glass-panel hidden"></div>
+
+    <script src="data.js"></script>
+    <script src="graph.js"></script>
+    <script src="ui.js"></script>
+</body>
+</html>
